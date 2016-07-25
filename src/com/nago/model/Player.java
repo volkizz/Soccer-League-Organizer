@@ -10,7 +10,7 @@ public class Player implements Comparable<Player>, Serializable {
   private int heightInInches;
   private boolean previousExperience;
 
-  public Player(String firstName, String lastName, int heightInInches, boolean previousExperience) {
+  Player(String firstName, String lastName, int heightInInches, boolean previousExperience) {
     this.firstName = firstName;
     this.lastName = lastName;
     this.heightInInches = heightInInches;
@@ -35,7 +35,6 @@ public class Player implements Comparable<Player>, Serializable {
 
   @Override
   public int compareTo(Player other) {
-    // We always want to sort by last name then first name
       if(this.lastName.compareTo(other.lastName)==0){
           return this.firstName.compareTo(other.firstName);
       }
@@ -53,7 +52,6 @@ public class Player implements Comparable<Player>, Serializable {
     if (previousExperience != player.previousExperience) return false;
     if (!firstName.equals(player.firstName)) return false;
     return lastName.equals(player.lastName);
-
   }
 
   @Override

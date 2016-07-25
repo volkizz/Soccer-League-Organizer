@@ -1,7 +1,6 @@
 package com.nago.model;
 
 public class Players {
-
   public static Player[] load() {
     return new Player[] {
       new Player("Joe", "Smith", 42, true),
@@ -38,7 +37,5 @@ public class Players {
       new Player("Johnny", "Thunder", 47, false),
       new Player("Ryan", "Creedson", 43, false)
     };
-
   }
-
 }

@@ -3,10 +3,6 @@ package com.nago.model;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Created by Mykola
- * 7/19/2016.
- */
 public class Team implements Comparable<Team>{
     private String teamName;
     private String coachName;

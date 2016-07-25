@@ -6,10 +6,6 @@ import com.nago.model.Team;
 
 import java.util.*;
 
-/**
- * Created by Mykola
- * 7/19/2016.
- */
 public class Organizer {
 
     private List<Team> teamList = new ArrayList<>();

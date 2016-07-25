@@ -6,10 +6,6 @@ import com.nago.model.Team;
 
 import java.util.*;
 
-/**
- * Created by Mykola
- * 7/19/2016.
- */
 public class Prompter {
     private Scanner scanner = new Scanner(System.in);
     private Organizer organizer;
@@ -77,22 +73,27 @@ public class Prompter {
         }
     }
 
+
     private void promptToAddPlayerToATeam() {
         if (!organizer.getTeamList().isEmpty()) {
             scanner.nextLine();
             System.out.printf("Add Player to A Team%nEnter a team name:");
             String teamName = teamMatchingInput();
-            if (organizer.getTeamFromTeamList(teamName).getTeamPlayers().size() != 11) {
-                promptHowManyAvailablePlayers();
-                System.out.printf("Enter an index of a Player you want to add to the %s", teamName);
-                checkForInt();
-                int playerIndex = scanner.nextInt();
-                organizer.addPlayerToTheTeam(teamName, players, playerIndex);
-            } else {
-                System.out.println("Team limit of 11 players is reached");
-            }
+            addPlayer(teamName);
         } else {
             System.out.println("There is no teams.");
+        }
+    }
+
+    private void addPlayer(String teamName) {
+        if (organizer.getTeamFromTeamList(teamName).getTeamPlayers().size() != 11) {
+            promptHowManyAvailablePlayers();
+            System.out.printf("Enter an index of a Player you want to add to the %s", teamName);
+            checkForInt();
+            int playerIndex = scanner.nextInt();
+            organizer.addPlayerToTheTeam(teamName, players, playerIndex);
+        } else {
+            System.out.printf("Team limit of 11 players is reached.%nPress ENTER to continue");
         }
     }
 
@@ -101,20 +102,28 @@ public class Prompter {
             scanner.nextLine();
             System.out.printf("Remove Player from the Team%nEnter a team name:");
             String teamName = teamMatchingInput();
-            if (promptHowManyPlayersInTheTeam(teamName) != -1) {
-                System.out.printf("Enter an index of a Player you want to remove from the %s", teamName);
-                checkForInt();
-                int playerIndex = scanner.nextInt();
-                if (organizer.getTeamFromTeamList(teamName).getTeamPlayers().size() > playerIndex && playerIndex >= 0) {
-                    organizer.removePlayerFromTheTeam(teamName, players, playerIndex);
-                } else {
-                    System.out.printf("There is no player with an index %d. Try again", playerIndex);
-                }
-            } else {
-                System.out.printf("There is no players in %s", teamName);
-            }
+            checkForPlayersToDelete(teamName);
         } else {
             System.out.println("There is no teams.");
+        }
+    }
+
+    private void checkForPlayersToDelete(String teamName) {
+        if (promptHowManyPlayersInTheTeam(teamName, true) != -1) {
+            System.out.printf("Enter an index of a Player you want to remove from the %s", teamName);
+            checkForInt();
+            int playerIndex = scanner.nextInt();
+            deletePlayer(teamName, playerIndex);
+        } else {
+            System.out.printf("There is no players in %s", teamName);
+        }
+    }
+
+    private void deletePlayer(String teamName, int playerIndex) {
+        if (organizer.getTeamFromTeamList(teamName).getTeamPlayers().size() > playerIndex && playerIndex >= 0) {
+            organizer.removePlayerFromTheTeam(teamName, players, playerIndex);
+        } else {
+            System.out.printf("There is no player with an index %d. Try again", playerIndex);
         }
     }
 
@@ -124,11 +133,13 @@ public class Prompter {
         do {
             input = scanner.nextLine();
             for (Team team : organizer.getTeamList()) {
-                if (team.getTeamName().equalsIgnoreCase(input)) {
+                if (!team.getTeamName().equalsIgnoreCase(input)) {
                     matching = true;
-                } else {
-                    System.out.println("No such a team. Try again: ");
+                    break;
                 }
+            }
+            if (!matching) {
+                System.out.println("No such a team. Try again: ");
             }
         } while (!matching);
         return input;
@@ -170,13 +181,19 @@ public class Prompter {
         }
     }
 
-    private Integer promptHowManyPlayersInTheTeam(String team) {
+    private boolean isTeamHasPlayers(String team) {
+        return !organizer.getTeamFromTeamList(team).getTeamPlayers().isEmpty();
+    }
+
+    private Integer promptHowManyPlayersInTheTeam(String team, boolean showList) {
         int playerIndex = 0;
-        if (!organizer.getTeamFromTeamList(team).getTeamPlayers().isEmpty()) {
+        if (isTeamHasPlayers(team) && showList) {
             for (Player player : organizer.getTeamFromTeamList(team).getTeamPlayers()) {
-                System.out.printf("%d. %s%n", playerIndex, player.toString());
+                System.out.printf("%d. %s", playerIndex, player.toString());
                 playerIndex++;
             }
+            return 1;
+        } else if (isTeamHasPlayers(team) && !showList) {
             return 1;
         }
         return -1;
@@ -192,14 +209,18 @@ public class Prompter {
             scanner.nextLine();
             System.out.println("Enter Team Name: ");
             String teamName = teamMatchingInput();
-            if (promptHowManyPlayersInTheTeam(teamName) != -1) {
-                playersByHeight = organizer.populatePlayersByHeightMap(organizer.getTeamFromTeamList(teamName).getTeamPlayers());
-                System.out.printf("Report By Height of a %s Players:%n %s", teamName, formattedString(playersByHeight.toString()));
-            } else {
-                System.out.printf("There is no players in %s", teamName);
-            }
+            populateAndShowMapForHeight(teamName);
         } else {
             System.out.println("There is no teams.");
+        }
+    }
+
+    private void populateAndShowMapForHeight(String teamName) {
+        if (promptHowManyPlayersInTheTeam(teamName, false) != -1) {
+            playersByHeight = organizer.populatePlayersByHeightMap(organizer.getTeamFromTeamList(teamName).getTeamPlayers());
+            System.out.printf("Report By Height of a %s Players:%n %s%nPress ENTER to continue", teamName, formattedString(playersByHeight.toString()));
+        } else {
+            System.out.printf("There is no players in %s", teamName);
         }
     }
 
@@ -210,12 +231,10 @@ public class Prompter {
     private void promptToPrintRosterForCoach() {
         System.out.println("Enter Coach name: ");
         String coachName = scanner.next();
-        for (Team team : organizer.getTeamList()) {
-            if (team.getCoachName().equalsIgnoreCase(coachName)) {
-                Collections.sort(team.getTeamPlayers());
-                System.out.printf("List of players for %s with coach %s%n%s", team.getTeamName(), coachName, formattedString(team.getTeamPlayers().toString()));
-            }
-        }
+        organizer.getTeamList().stream().filter(team -> team.getCoachName().equalsIgnoreCase(coachName)).forEach(team -> {
+            Collections.sort(team.getTeamPlayers());
+            System.out.printf("List of players for %s with coach %s%n%s", team.getTeamName(), coachName, formattedString(team.getTeamPlayers().toString()));
+        });
     }
 
     private String formattedString(String stringToFormat) {
