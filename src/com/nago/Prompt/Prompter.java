@@ -133,7 +133,7 @@ public class Prompter {
         do {
             input = scanner.nextLine();
             for (Team team : organizer.getTeamList()) {
-                if (!team.getTeamName().equalsIgnoreCase(input)) {
+                if (team.getTeamName().equalsIgnoreCase(input)) {
                     matching = true;
                     break;
                 }
@@ -218,10 +218,23 @@ public class Prompter {
     private void populateAndShowMapForHeight(String teamName) {
         if (promptHowManyPlayersInTheTeam(teamName, false) != -1) {
             playersByHeight = organizer.populatePlayersByHeightMap(organizer.getTeamFromTeamList(teamName).getTeamPlayers());
-            System.out.printf("Report By Height of a %s Players:%n %s%nPress ENTER to continue", teamName, formattedString(playersByHeight.toString()));
+            compareToOtherTeams(playersByHeight, teamName);
         } else {
             System.out.printf("There is no players in %s", teamName);
         }
+    }
+
+    private void compareToOtherTeams(Map<Integer, List<String>> playersByHeight, String teamName){
+        Map<String, Map<Integer, Integer>> otherTeam = organizer.otherTeamsWithSamePlayersHeight(playersByHeight, teamName);
+        System.out.printf("Report By Height of a %s Players:%n %s%n", teamName, formattedString(playersByHeight.toString()));
+        for (Map.Entry<String, Map<Integer, Integer>> entry : otherTeam.entrySet()) {
+            String otherTeamName = entry.getKey();
+            System.out.printf("Team %s has:%n", otherTeamName);
+            for (Map.Entry<Integer, Integer> subEntry : otherTeam.get(otherTeamName).entrySet()) {
+                System.out.printf("%d players with height %d%n", subEntry.getValue(), subEntry.getKey());
+            }
+        }
+        System.out.println("Press ENTER to continue");
     }
 
     private void promptExpReport() {
