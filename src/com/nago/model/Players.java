@@ -1,4 +1,4 @@
-package com.teamtreehouse.model;
+package com.nago.model;
 
 public class Players {
 
