@@ -11,16 +11,18 @@ public class Prompter {
     private Organizer organizer;
     private List<Player> players = new ArrayList<>();
     private Map<Integer, List<String>> playersByHeight;
+    private int maxTeams;
+    private boolean exit;
 
     public void start() {
         organizer = new Organizer();
         players.addAll(Arrays.asList(organizer.loadPlayers()));
+        maxTeams = players.size() / 11;
+        exit = false;
         promptWelcome();
         do {
             promptMainMenu();
-        } while (!scanner.nextLine().equals("exit"));
-
-        System.out.println(organizer.getTeamList());
+        } while (!exit);
     }
 
     private void promptWelcome() {
@@ -28,7 +30,7 @@ public class Prompter {
     }
 
     private void promptMainMenu() {
-        System.out.printf("%n0----||===============================>%nTo chose enter a NUMBER of an option.%n1. Show ALL players %n2. Show All teams%n3. Create a TEAM.%n4. Add player to a team%n5. Remove Player from the team%n6. Show Height ratio of available players%n7. Show Height report for a TEAM%n8. Experience Report%n9. Print roster for coach%n0----||===============================>%n");
+        System.out.printf("%n0----||===============================>%nTo chose enter a NUMBER of an option.%n1. Show all AVAILABLE players %n2. Show all TEAMS%n3. Create a TEAM.%n4. Add a PLAYER to a TEAM%n5. Remove PLAYER from the TEAM%n6. Show HEIGHT ratio of AVAILABLE players%n7. Show HEIGHT report for a TEAM%n8. Experience Report%n9. Print ROSTER for COACH%n10. Exit%n0----||===============================>%n");
         checkForInt();
         switch (scanner.nextInt()) {
             case 1:
@@ -58,10 +60,18 @@ public class Prompter {
             case 9:
                 promptToPrintRosterForCoach();
                 break;
+            case 10:
+                exit();
+                break;
             default:
                 System.out.println("There is NO such an option");
                 break;
         }
+    }
+
+    private void exit(){
+        System.out.println("Soccer League Organizer made by Mykola Nagorskyi.\nExiting...\nHave a good day!!!");
+        exit = true;
     }
 
     private void promptTeamList() {
@@ -72,7 +82,6 @@ public class Prompter {
             System.out.printf("%d. \033[1m%s\033[0m with coach \033[1m%s\033[0m%n", number, team.getTeamName(), team.getCoachName());
         }
     }
-
 
     private void promptToAddPlayerToATeam() {
         if (!organizer.getTeamList().isEmpty()) {
@@ -146,7 +155,7 @@ public class Prompter {
     }
 
     private void promptToCreateTeam() {
-        if (players.size() >= 11) {
+        if (organizer.getTeamList().size() < maxTeams) {
             scanner.nextLine();
             System.out.println("Enter team name: ");
             String teamName = notEmptyInput();
@@ -155,7 +164,7 @@ public class Prompter {
             organizer.addTeam(teamName, coachName);
             System.out.printf("The team \033[1m%s\033[0m with coach \033[1m%s\033[0m was added \033[1msuccessfully!\033[0m%nPress ENTER to coninue...", teamName, coachName);
         } else {
-            System.out.println("Not enough players to create a team. Must be at least 11");
+            System.out.printf("Each team must have 11 players. Team limit %d is reached", maxTeams);
         }
     }
 
@@ -224,7 +233,7 @@ public class Prompter {
         }
     }
 
-    private void compareToOtherTeams(Map<Integer, List<String>> playersByHeight, String teamName){
+    private void compareToOtherTeams(Map<Integer, List<String>> playersByHeight, String teamName) {
         Map<String, Map<Integer, Integer>> otherTeam = organizer.otherTeamsWithSamePlayersHeight(playersByHeight, teamName);
         System.out.printf("Report By Height of a %s Players:%n %s%n", teamName, formattedString(playersByHeight.toString()));
         for (Map.Entry<String, Map<Integer, Integer>> entry : otherTeam.entrySet()) {
@@ -234,7 +243,6 @@ public class Prompter {
                 System.out.printf("%d players with height %d%n", subEntry.getValue(), subEntry.getKey());
             }
         }
-        System.out.println("Press ENTER to continue");
     }
 
     private void promptExpReport() {
@@ -246,7 +254,7 @@ public class Prompter {
         String coachName = scanner.next();
         organizer.getTeamList().stream().filter(team -> team.getCoachName().equalsIgnoreCase(coachName)).forEach(team -> {
             Collections.sort(team.getTeamPlayers());
-            System.out.printf("List of players for %s with coach %s%n%s", team.getTeamName(), coachName, formattedString(team.getTeamPlayers().toString()));
+            System.out.printf("List of players for %s with coach %s:%n %s", team.getTeamName(), coachName, formattedString(team.getTeamPlayers().toString()));
         });
     }
 

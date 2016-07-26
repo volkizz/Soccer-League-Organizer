@@ -23,7 +23,7 @@ public class Organizer {
         return teamList;
     }
 
-    public Team getTeamFromTeamList(String teamName) throws NullPointerException {
+    public Team getTeamFromTeamList(String teamName) {
         Team result = null;
         for (Team team : teamList) {
             if (team.getTeamName().equals(teamName)) {
@@ -94,13 +94,10 @@ public class Organizer {
                     notExpCount++;
                 }
             }
-            int expPercentage = 0;
-            int notExpPercentage = 0;
-            if (expCount > 0) {
-                expPercentage = (expCount * 100) / (expCount + notExpCount);
-                notExpPercentage = 100 - expPercentage;
-            }
-            String expRatio = String.format("Experienced - %d - %d%%, NOT Experienced - %d - %d%%%n", expCount, expPercentage, notExpCount, notExpPercentage);
+            double expPercentage = (double) (expCount * 100) / (expCount + notExpCount);
+            double notExpPercentage = (double) (notExpCount * 100) / (expCount + notExpCount);
+
+            String expRatio = String.format("Experienced - %d - %,.2f%%, NOT Experienced - %d - %,.2f%%%n", expCount, expPercentage, notExpCount, notExpPercentage);
             result.put(team.getTeamName(), expRatio);
         }
         return result;
