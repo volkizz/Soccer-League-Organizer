@@ -25,12 +25,16 @@ public class Prompter {
         } while (!exit);
     }
 
+    private void message(String message, Object... objects) {
+        System.out.printf(message, objects);
+    }
+
     private void promptWelcome() {
-        System.out.println("Welcome to \033[1mSoccer League Organizer\033[0m!!!");
+        message("Welcome to \033[1mSoccer League Organizer\033[0m!!!");
     }
 
     private void promptMainMenu() {
-        System.out.printf("%n0----||===============================>%nTo chose enter a NUMBER of an option.%n1. Show all AVAILABLE players %n2. Show all TEAMS%n3. Create a TEAM.%n4. Add a PLAYER to a TEAM%n5. Remove PLAYER from the TEAM%n6. Show HEIGHT ratio of AVAILABLE players%n7. Show HEIGHT report for a TEAM%n8. Experience Report%n9. Print ROSTER for COACH%n10. Exit%n0----||===============================>%n");
+        message("%n0----||===============================>%nTo chose enter a NUMBER of an option.%n1. Show all AVAILABLE players %n2. Show all TEAMS%n3. Create a TEAM.%n4. Add a PLAYER to a TEAM%n5. Remove PLAYER from the TEAM%n6. Show HEIGHT ratio of AVAILABLE players%n7. Show HEIGHT report for a TEAM%n8. Experience Report%n9. Print ROSTER for COACH%n10. Exit%n0----||===============================>%n");
         checkForInt();
         switch (scanner.nextInt()) {
             case 1:
@@ -64,67 +68,79 @@ public class Prompter {
                 exit();
                 break;
             default:
-                System.out.println("There is NO such an option");
+                message("There is NO such an option");
                 break;
         }
     }
 
-    private void exit(){
-        System.out.println("Soccer League Organizer made by Mykola Nagorskyi.\nExiting...\nHave a good day!!!");
+    private void exit() {
+        message("Soccer League Organizer made by Mykola Nagorskyi.\nExiting...\nHave a good day!!!");
         exit = true;
     }
 
     private void promptTeamList() {
-        System.out.println("Team's List:");
-        int number = 0;
-        for (Team team : organizer.getTeamList()) {
-            number++;
-            System.out.printf("%d. \033[1m%s\033[0m with coach \033[1m%s\033[0m%n", number, team.getTeamName(), team.getCoachName());
+        if (organizer.getTeamList().isEmpty()) {
+            message("There is NO teams.");
+        } else {
+            message("Team's List:");
+            int number = 0;
+            for (Team team : organizer.getTeamList()) {
+                number++;
+                message("%n%d. \033[1m%s\033[0m with coach \033[1m%s\033[0m", number, team.getTeamName(), team.getCoachName());
+            }
         }
     }
 
     private void promptToAddPlayerToATeam() {
         if (!organizer.getTeamList().isEmpty()) {
             scanner.nextLine();
-            System.out.printf("Add Player to A Team%nEnter a team name:");
+            message("Add Player to A Team%nEnter a team name:");
             String teamName = teamMatchingInput();
             addPlayer(teamName);
         } else {
-            System.out.println("There is no teams.");
+            message("There is no teams.");
         }
     }
 
     private void addPlayer(String teamName) {
         if (organizer.getTeamFromTeamList(teamName).getTeamPlayers().size() != 11) {
             promptHowManyAvailablePlayers();
-            System.out.printf("Enter an index of a Player you want to add to the %s", teamName);
+            message("Enter an index of a Player you want to add to the %s", teamName);
             checkForInt();
             int playerIndex = scanner.nextInt();
+            message("Player %s %s was added to the %s team successfully! ",
+                    players.get(playerIndex).getFirstName(),
+                    players.get(playerIndex).getLastName(),
+                    teamName);
             organizer.addPlayerToTheTeam(teamName, players, playerIndex);
         } else {
-            System.out.printf("Team limit of 11 players is reached.%nPress ENTER to continue");
+            message("Team limit of 11 players is reached.%nPress ENTER to continue");
         }
     }
 
     private void promptToRemovePlayerFromTheTeam() {
         if (!organizer.getTeamList().isEmpty()) {
             scanner.nextLine();
-            System.out.printf("Remove Player from the Team%nEnter a team name:");
+            message("Remove Player from the Team%nEnter a team name:");
             String teamName = teamMatchingInput();
             checkForPlayersToDelete(teamName);
         } else {
-            System.out.println("There is no teams.");
+            message("There is no teams.");
         }
     }
 
     private void checkForPlayersToDelete(String teamName) {
         if (promptHowManyPlayersInTheTeam(teamName, true) != -1) {
-            System.out.printf("Enter an index of a Player you want to remove from the %s", teamName);
+            message("Enter an index of a Player you want to remove from the %s", teamName);
             checkForInt();
             int playerIndex = scanner.nextInt();
+            message("Player %s %s was DELETED from the %s team successfully! ",
+                    players.get(playerIndex).getFirstName(),
+                    players.get(playerIndex).getLastName(),
+                    teamName);
             deletePlayer(teamName, playerIndex);
         } else {
-            System.out.printf("There is no players in %s", teamName);
+            message("There is no players in %s", teamName);
         }
     }
 
@@ -132,7 +148,7 @@ public class Prompter {
         if (organizer.getTeamFromTeamList(teamName).getTeamPlayers().size() > playerIndex && playerIndex >= 0) {
             organizer.removePlayerFromTheTeam(teamName, players, playerIndex);
         } else {
-            System.out.printf("There is no player with an index %d. Try again", playerIndex);
+            message("There is no player with an index %d. Try again", playerIndex);
         }
     }
 
@@ -148,7 +164,7 @@ public class Prompter {
                 }
             }
             if (!matching) {
-                System.out.println("No such a team. Try again: ");
+                message("No such a team. Try again: ");
             }
         } while (!matching);
         return input;
@@ -157,14 +173,14 @@ public class Prompter {
     private void promptToCreateTeam() {
         if (organizer.getTeamList().size() < maxTeams) {
             scanner.nextLine();
-            System.out.println("Enter team name: ");
+            message("Enter team name: ");
             String teamName = notEmptyInput();
-            System.out.printf("Enter coach name for %s: ", teamName);
+            message("Enter coach name for %s: ", teamName);
             String coachName = notEmptyInput();
             organizer.addTeam(teamName, coachName);
-            System.out.printf("The team \033[1m%s\033[0m with coach \033[1m%s\033[0m was added \033[1msuccessfully!\033[0m%nPress ENTER to coninue...", teamName, coachName);
+            message("The team \033[1m%s\033[0m with coach \033[1m%s\033[0m was added \033[1msuccessfully!\033[0m%nPress ENTER to coninue...", teamName, coachName);
         } else {
-            System.out.printf("Each team must have 11 players. Team limit %d is reached", maxTeams);
+            message("Each team must have 11 players. Team limit %d is reached", maxTeams);
         }
     }
 
@@ -173,7 +189,7 @@ public class Prompter {
         do {
             input = scanner.nextLine();
             if (input.isEmpty() || input.matches("\\s+")) {
-                System.out.println("Can't be empty. Try again:");
+                message("Can't be empty. Try again:");
             }
         }
         while (input.isEmpty() || input.matches("\\s+"));
@@ -181,11 +197,11 @@ public class Prompter {
     }
 
     private void promptHowManyAvailablePlayers() {
-        System.out.printf("There are currently %d registered players.%n", players.size());
+        message("There are currently %d registered players.%n", players.size());
         Collections.sort(players);
         int playerIndex = 0;
         for (Player player : players) {
-            System.out.printf("%d. %s", playerIndex, player.toString());
+            message("%d. %s", playerIndex, player.toString());
             playerIndex++;
         }
     }
@@ -198,7 +214,7 @@ public class Prompter {
         int playerIndex = 0;
         if (isTeamHasPlayers(team) && showList) {
             for (Player player : organizer.getTeamFromTeamList(team).getTeamPlayers()) {
-                System.out.printf("%d. %s", playerIndex, player.toString());
+                message("%d. %s", playerIndex, player.toString());
                 playerIndex++;
             }
             return 1;
@@ -210,17 +226,17 @@ public class Prompter {
 
     private void promptAvailablePlayersByHeight() {
         playersByHeight = organizer.populatePlayersByHeightMap(players);
-        System.out.println("Report By Height of Available Players (NOT on the TEAM):\n" + formattedString(playersByHeight.toString()));
+        message("Report By Height of Available Players (NOT on the TEAM):\n" + formattedString(playersByHeight.toString()));
     }
 
     private void promptTeamPlayersByHeight() {
         if (!organizer.getTeamList().isEmpty()) {
             scanner.nextLine();
-            System.out.println("Enter Team Name: ");
+            message("Enter Team Name: ");
             String teamName = teamMatchingInput();
             populateAndShowMapForHeight(teamName);
         } else {
-            System.out.println("There is no teams.");
+            message("There is no teams.");
         }
     }
 
@@ -229,32 +245,32 @@ public class Prompter {
             playersByHeight = organizer.populatePlayersByHeightMap(organizer.getTeamFromTeamList(teamName).getTeamPlayers());
             compareToOtherTeams(playersByHeight, teamName);
         } else {
-            System.out.printf("There is no players in %s", teamName);
+            message("There is no players in %s", teamName);
         }
     }
 
     private void compareToOtherTeams(Map<Integer, List<String>> playersByHeight, String teamName) {
         Map<String, Map<Integer, Integer>> otherTeam = organizer.otherTeamsWithSamePlayersHeight(playersByHeight, teamName);
-        System.out.printf("Report By Height of a %s Players:%n %s%n", teamName, formattedString(playersByHeight.toString()));
+        message("Report By Height of a %s Players:%n %s%n", teamName, formattedString(playersByHeight.toString()));
         for (Map.Entry<String, Map<Integer, Integer>> entry : otherTeam.entrySet()) {
             String otherTeamName = entry.getKey();
-            System.out.printf("Team %s has:%n", otherTeamName);
+            message("Team %s has:%n", otherTeamName);
             for (Map.Entry<Integer, Integer> subEntry : otherTeam.get(otherTeamName).entrySet()) {
-                System.out.printf("%d players with height %d%n", subEntry.getValue(), subEntry.getKey());
+                message("%d players with height %d%n", subEntry.getValue(), subEntry.getKey());
             }
         }
     }
 
     private void promptExpReport() {
-        System.out.printf("Experience Report: %n %s", formattedString(organizer.experienceRatio().toString()));
+        message("Experience Report: %n %s", formattedString(organizer.experienceRatio().toString()));
     }
 
     private void promptToPrintRosterForCoach() {
-        System.out.println("Enter Coach name: ");
+        message("Enter Coach name: ");
         String coachName = scanner.next();
         organizer.getTeamList().stream().filter(team -> team.getCoachName().equalsIgnoreCase(coachName)).forEach(team -> {
             Collections.sort(team.getTeamPlayers());
-            System.out.printf("List of players for %s with coach %s:%n %s", team.getTeamName(), coachName, formattedString(team.getTeamPlayers().toString()));
+            message("List of players for %s with coach %s:%n %s", team.getTeamName(), coachName, formattedString(team.getTeamPlayers().toString()));
         });
     }
 
@@ -266,7 +282,7 @@ public class Prompter {
 
     private void checkForInt() {
         while (!scanner.hasNextInt()) {
-            System.out.println("That is NOT a number, please try again:");
+            message("That is NOT a number, please try again:");
             scanner.next();
         }
     }
